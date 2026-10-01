@@ -28,7 +28,8 @@
 :root {
   --bg: #f3f3f0;
   --fg: #141414;
-  --muted: #5c5c57;
+  --muted: #6c6c67;
+  --soft: #8a8a85;
   --line: #d9d9d4;
   --mid: #8c8c87;
   --accent: #c2410c;
@@ -40,6 +41,7 @@
     --bg: #121212;
     --fg: #ededea;
     --muted: #a1a19b;
+    --soft: #7d7d78;
     --line: #2c2c2a;
     --mid: #6e6e69;
     --accent: #fb7a45;
@@ -51,6 +53,7 @@
   --color-bg: var(--bg);
   --color-fg: var(--fg);
   --color-muted: var(--muted);
+  --color-soft: var(--soft);
   --color-line: var(--line);
   --color-accent: var(--accent);
   --color-on-fg: var(--on-fg);

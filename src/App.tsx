@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowDown, ArrowRight } from "@phosphor-icons/react";
 
@@ -22,17 +22,23 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
   );
 }
 
-const logos = [
-  { name: "KTO", file: "kto" },
-  { name: "Betsson", file: "betsson" },
+const logos: { name: string; file: string; ext?: string; size?: string }[] = [
+  { name: "KTO", file: "kto", size: "w-full h-[28.8px] md:h-9" },
+  { name: "Betsson", file: "betsson", size: "w-[90%] h-[28.8px] md:h-9" },
   { name: "NetRefer", file: "netrefer" },
-  { name: "Brand name", file: "placeholder-3" },
+  { name: "Authentic Gaming", file: "authentic-gaming", ext: "png", size: "w-full h-16 md:h-20" },
 ];
 
-const principles = [
-  ["Start with the decision.", "Every project begins by naming the decision the product helps someone make."],
-  ["Prototype early.", "I test rough flows with real users before polishing a single screen."],
-  ["Ship with engineers.", "I work in the language of the codebase, so what ships matches what was designed."],
+const principles: [string, ReactNode][] = [
+  [
+    "Stakeholder Alignment.",
+    <>
+      Every project begins from continuous stakeholder alignment, what, why and who{" "}
+      <ArrowRight aria-label="leads to" weight="regular" className="inline size-[0.7em] align-baseline" /> discover
+    </>,
+  ],
+  ["Prototype smarter.", "I use AI to rapidly explore ideas, flows, motion, validate assumptions and cross test with real users or data. Iterate into a polished UI."],
+  ["Ship pragmatically.", "I understand the codebase, constraints, and possibilities, turning design intent into what actually ships."],
 ];
 
 const roles = [
@@ -42,7 +48,38 @@ const roles = [
   ["Lead Design, Betsson Labs", "2012-2013"],
 ];
 
+const NAV_LINKS = [
+  { id: "ethos", label: "Ethos" },
+  { id: "about", label: "About" },
+  { id: "contact", label: "Contact" },
+];
+
+/* Marks the section crossing the middle of the viewport so the reader knows where they are. */
+function useActiveSection(ids: string[]) {
+  const [active, setActive] = useState<string | null>(null);
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActive(entry.target.id);
+          else setActive((cur) => (cur === entry.target.id ? null : cur));
+        }
+      },
+      { rootMargin: "-45% 0px -50% 0px" },
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [ids]);
+  return active;
+}
+
+const NAV_IDS = NAV_LINKS.map((l) => l.id);
+
 function Nav() {
+  const active = useActiveSection(NAV_IDS);
   return (
     <header className="sticky top-0 z-40 bg-bg/85 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
@@ -61,10 +98,27 @@ function Nav() {
             }}
           />
         </a>
-        <ul className="flex items-center gap-6 text-sm text-muted md:gap-10">
-          <li><a className="transition-colors hover:text-fg" href="#work">Work</a></li>
-          <li><a className="transition-colors hover:text-fg" href="#about">About</a></li>
-          <li><a className="transition-colors hover:text-fg" href="#contact">Contact</a></li>
+        <ul className="flex items-center gap-6 text-base text-muted md:gap-10">
+          {NAV_LINKS.map((l) => {
+            const on = active === l.id;
+            return (
+              <li key={l.id}>
+                <a
+                  href={`#${l.id}`}
+                  aria-current={on ? "location" : undefined}
+                  className={`relative transition-colors hover:text-fg ${on ? "text-fg" : ""}`}
+                >
+                  <span
+                    aria-hidden="true"
+                    className={`absolute -left-3 top-1/2 size-1.5 -translate-y-1/2 rounded-full bg-fg transition-all duration-300 ${
+                      on ? "scale-100 opacity-100" : "scale-0 opacity-0"
+                    }`}
+                  />
+                  {l.label}
+                </a>
+              </li>
+            );
+          })}
         </ul>
       </nav>
     </header>
@@ -88,14 +142,14 @@ function Hero() {
           Twenty years building brands and products
         </motion.h1>
         <motion.p {...enter(0.12)} className="mt-6 max-w-[48ch] text-base leading-relaxed text-muted md:text-lg">
-          Senior product designer working on research, systems and interfaces for fintech and health teams.
+          From creating world-class brands from the ground up to designing large-scale sportsbook and casino platforms across web and native, my work speaks for itself.
         </motion.p>
         <motion.div {...enter(0.24)} className="mt-10">
           <a
-            href="#work"
+            href="#contact"
             className="group inline-flex items-center gap-2 bg-fg px-6 py-3.5 text-sm font-medium text-on-fg transition-transform active:scale-[0.98]"
           >
-            View work
+            Get in touch
             <ArrowDown size={16} weight="regular" className="transition-transform group-hover:translate-y-0.5" />
           </a>
         </motion.div>
@@ -117,20 +171,17 @@ function Hero() {
 function Work() {
   return (
     <section id="work" className="mx-auto max-w-7xl scroll-mt-16 px-4 py-24 md:px-8 md:py-40">
-      <Reveal>
-        <h2 className="text-3xl font-medium tracking-tighter md:text-5xl">Work</h2>
-      </Reveal>
-      <ul className="mt-16 grid grid-cols-2 items-center gap-x-8 gap-y-14 md:mt-24 md:grid-cols-4 md:gap-x-16">
+      <ul aria-label="Brands I have worked with" className="grid grid-cols-2 items-center gap-x-8 gap-y-14 md:grid-cols-4 md:gap-x-16">
         {logos.map((l, i) => (
           <li key={l.file}>
             <Reveal delay={i * 0.06}>
               <span
                 role="img"
                 aria-label={`${l.name} logo`}
-                className="block h-8 w-full bg-fg md:h-10"
+                className={`block bg-fg ${l.size ?? "w-full h-8 md:h-10"}`}
                 style={{
-                  maskImage: `url(/logos/${l.file}.svg)`,
-                  WebkitMaskImage: `url(/logos/${l.file}.svg)`,
+                  maskImage: `url(/logos/${l.file}.${l.ext ?? "svg"})`,
+                  WebkitMaskImage: `url(/logos/${l.file}.${l.ext ?? "svg"})`,
                   maskRepeat: "no-repeat",
                   WebkitMaskRepeat: "no-repeat",
                   maskPosition: "left center",
@@ -149,16 +200,11 @@ function Work() {
 
 const phases = ["Discover", "Define", "Develop", "Deliver"];
 
-/* Double diamond: the outlines draw in on scroll to show the process opening up, then narrowing, twice. */
+/* Double diamond: static drawing of the discover, define, develop, deliver process. */
 function DoubleDiamond() {
-  const reduce = useReducedMotion();
-  const draw = {
-    initial: reduce ? false : { pathLength: 0 },
-    whileInView: { pathLength: 1 },
-    viewport: { once: true, amount: 0.4 },
-  } as const;
   return (
-    <div className="relative">
+    <div>
+      <div className="relative">
       <svg viewBox="0 0 1000 500" className="block w-full overflow-visible text-fg" fill="none" aria-hidden="true">
         {[250, 500, 750].map((x) => (
           <line
@@ -174,23 +220,19 @@ function DoubleDiamond() {
             vectorEffect="non-scaling-stroke"
           />
         ))}
-        <motion.polygon
+        <polygon
           points="2,250 250,10 498,250 250,490"
           stroke="var(--mid)"
           strokeWidth={1}
           strokeLinejoin="miter"
           vectorEffect="non-scaling-stroke"
-          {...draw}
-          transition={{ duration: 1.4, ease: EASE }}
         />
-        <motion.polygon
+        <polygon
           points="502,250 750,10 998,250 750,490"
           stroke="var(--mid)"
           strokeWidth={1}
           strokeLinejoin="miter"
           vectorEffect="non-scaling-stroke"
-          {...draw}
-          transition={{ duration: 1.4, delay: 0.5, ease: EASE }}
         />
       </svg>
       <span className="absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg px-2 text-xl font-medium tracking-tighter md:text-5xl">
@@ -199,6 +241,7 @@ function DoubleDiamond() {
       <span className="absolute left-3/4 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg px-2 text-xl font-medium tracking-tighter md:text-5xl">
         Solution
       </span>
+      </div>
       <div className="relative mt-6 md:mt-10">
         <ul className="grid grid-cols-4 text-center text-xs font-medium tracking-tight md:text-xl">
           {phases.map((ph) => (
@@ -220,18 +263,18 @@ function DoubleDiamond() {
 
 function Approach() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-24 md:px-8 md:py-40">
+    <section id="ethos" className="mx-auto max-w-7xl scroll-mt-16 px-4 py-24 md:px-8 md:py-40">
       <Reveal>
         <h2 className="text-3xl font-medium tracking-tighter md:text-5xl">Ethos</h2>
       </Reveal>
-      <Reveal className="mt-16 md:mt-24">
+      <div className="mt-16 md:mt-24">
         <DoubleDiamond />
-      </Reveal>
+      </div>
       <div className="mt-24 flex flex-col gap-14 md:ml-[33%] md:mt-40 md:gap-20">
         {principles.map(([lead, body], i) => (
           <Reveal key={lead} delay={i * 0.06}>
             <p className="max-w-[36ch] text-2xl font-medium leading-snug tracking-tight md:text-4xl">
-              {lead} <span className="font-normal text-muted">{body}</span>
+              {lead} <span className="font-normal text-soft">{body}</span>
             </p>
           </Reveal>
         ))}
@@ -293,8 +336,7 @@ function Footer() {
       <div className="mt-24 flex flex-wrap items-center justify-between gap-4 text-sm text-muted md:mt-40">
         <p>2026 Mario Borg</p>
         <ul className="flex gap-6">
-          <li><a className="transition-colors hover:text-fg" href="https://www.linkedin.com/in/marioborg/?isSelfProfile=true" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
-          <li><a className="transition-colors hover:text-fg" href="#top">Read.cv</a></li>
+          <li><a className="transition-colors hover:text-fg" href="https://www.linkedin.com/in/marioborg" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
         </ul>
       </div>
     </footer>
