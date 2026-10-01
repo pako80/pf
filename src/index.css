@@ -58,6 +58,7 @@
   --color-accent: var(--accent);
   --color-on-fg: var(--on-fg);
   --font-sans: "Circular Std", system-ui, sans-serif;
+  --font-serif: "EB Garamond", Georgia, serif;
   --font-mono: "Geist Mono Variable", ui-monospace, monospace;
 }
 

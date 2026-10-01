@@ -1,10 +1,9 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+import lottie from "lottie-web";
 import { motion, useReducedMotion } from "motion/react";
 import { ArrowDown, ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-const img = (seed: string, w: number, h: number) =>
-  `https://picsum.photos/seed/${seed}/${w}/${h}?grayscale`;
 
 /* Reveal on scroll: shows hierarchy by bringing content in as the reader reaches it. */
 function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; delay?: number; className?: string }) {
@@ -25,7 +24,7 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
 const logos: { name: string; file: string; ext?: string; size?: string }[] = [
   { name: "KTO", file: "kto", size: "w-full h-[28.8px] md:h-9" },
   { name: "Betsson", file: "betsson", size: "w-[90%] h-[28.8px] md:h-9" },
-  { name: "NetRefer", file: "netrefer" },
+  { name: "NetRefer", file: "netrefer", size: "w-full h-[33.6px] md:h-[42px]" },
   { name: "Authentic Gaming", file: "authentic-gaming", ext: "png", size: "w-full h-16 md:h-20" },
 ];
 
@@ -33,7 +32,7 @@ const principles: [string, ReactNode][] = [
   [
     "Stakeholder Alignment.",
     <>
-      Every project begins from continuous stakeholder alignment, what, why and who{" "}
+      Every successful project is the result of continuous stakeholder alignment, what, why and who{" "}
       <ArrowRight aria-label="leads to" weight="regular" className="inline size-[0.7em] align-baseline" /> discover
     </>,
   ],
@@ -42,15 +41,16 @@ const principles: [string, ReactNode][] = [
 ];
 
 const roles = [
-  ["Head of Design, KTO Group", "2017-2026"],
-  ["Lead Design for Products, Betsson", "2015-2017"],
-  ["Lead Design for Native, Betsson", "2013-2015"],
-  ["Lead Design, Betsson Labs", "2012-2013"],
+  ["Head of Design", "KTO Group", "2017-2026"],
+  ["Lead Design for Products", "Betsson", "2015-2017"],
+  ["Lead Design for Native", "Betsson", "2013-2015"],
+  ["Lead Design", "Betsson Labs", "2012-2013"],
 ];
 
 const NAV_LINKS = [
   { id: "ethos", label: "Ethos" },
   { id: "about", label: "About" },
+  { id: "experience", label: "CV" },
   { id: "contact", label: "Contact" },
 ];
 
@@ -106,7 +106,7 @@ function Nav() {
                 <a
                   href={`#${l.id}`}
                   aria-current={on ? "location" : undefined}
-                  className={`relative transition-colors hover:text-fg ${on ? "text-fg" : ""}`}
+                  className={`relative ${on ? "text-fg" : ""}`}
                 >
                   <span
                     aria-hidden="true"
@@ -122,6 +122,33 @@ function Nav() {
         </ul>
       </nav>
     </header>
+  );
+}
+
+/* Hero animation: Discover, Define, Develop, Deliver typed out in a loop. Paused on a still frame under reduced motion. */
+function TypingAnimation() {
+  const box = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
+  useEffect(() => {
+    if (!box.current) return;
+    const anim = lottie.loadAnimation({
+      container: box.current,
+      renderer: "svg",
+      loop: true,
+      autoplay: !reduce,
+      path: "/animations/typing_4D.json",
+      rendererSettings: { preserveAspectRatio: "xMaxYMin meet" },
+    });
+    if (reduce) anim.addEventListener("DOMLoaded", () => anim.goToAndStop(150, true));
+    return () => anim.destroy();
+  }, [reduce]);
+  return (
+    <div
+      ref={box}
+      role="img"
+      aria-label="Discover, Define, Develop, Deliver"
+      className="aspect-[4/5] w-full md:max-h-[68dvh]"
+    />
   );
 }
 
@@ -150,19 +177,12 @@ function Hero() {
             className="group inline-flex items-center gap-2 bg-fg px-6 py-3.5 text-sm font-medium text-on-fg transition-transform active:scale-[0.98]"
           >
             Get in touch
-            <ArrowDown size={16} weight="regular" className="transition-transform group-hover:translate-y-0.5" />
+            <ArrowDown size={16} weight="regular" />
           </a>
         </motion.div>
       </div>
       <motion.div {...enter(0.18)} className="md:col-span-5">
-        <img
-          src={img("mario-studio-light", 900, 1100)}
-          alt="Morning light across a designer's desk with sketches and a laptop"
-          width={900}
-          height={1100}
-          fetchPriority="high"
-          className="aspect-[4/5] w-full object-cover md:max-h-[68dvh]"
-        />
+        <TypingAnimation />
       </motion.div>
     </section>
   );
@@ -198,7 +218,97 @@ function Work() {
   );
 }
 
-const phases = ["Discover", "Define", "Develop", "Deliver"];
+/* Open arrowhead drawn at the origin; (dx, dy) is the direction of travel. */
+function Arrowhead({ dx, dy }: { dx: number; dy: number }) {
+  const len = Math.hypot(dx, dy);
+  const bx = -dx / len;
+  const by = -dy / len;
+  const L = 20;
+  const c = Math.SQRT1_2;
+  const barb = (sign: 1 | -1) => {
+    const rx = bx * c - sign * by * c;
+    const ry = sign * bx * c + by * c;
+    return `${L * rx},${L * ry}`;
+  };
+  return (
+    <polyline
+      points={`${barb(1)} 0,0 ${barb(-1)}`}
+      stroke="var(--mid)"
+      strokeWidth={1.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      vectorEffect="non-scaling-stroke"
+    />
+  );
+}
+
+type Pt = { x: number; y: number };
+
+const LOOP_SECONDS = 32;
+const mid = (a: Pt, b: Pt): Pt => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+
+/*
+ * An arrowhead that circles a diamond: it follows each edge, turns 90 degrees at every corner and keeps going
+ * until it is back where it started. `vertices` are listed in travel order, `startEdge` picks where the loop begins,
+ * and `turn` is -90 for counter-clockwise or 90 for clockwise. Static on its edge under reduced motion.
+ */
+function FlowArrow({ vertices, startEdge, turn }: { vertices: [Pt, Pt, Pt, Pt]; startEdge: number; turn: -90 | 90 }) {
+  const reduce = useReducedMotion();
+  const v = (i: number) => vertices[(startEdge + i) % 4];
+  const start = mid(v(0), v(1));
+  const dx = v(1).x - v(0).x;
+  const dy = v(1).y - v(0).y;
+
+  if (reduce) {
+    return (
+      <g transform={`translate(${start.x} ${start.y})`}>
+        <Arrowhead dx={dx} dy={dy} />
+      </g>
+    );
+  }
+
+  const path = [start, v(1), v(2), v(3), v(4), start];
+  const times = [0, 0.125, 0.375, 0.625, 0.875, 1];
+  const linear = { duration: LOOP_SECONDS, ease: "linear", repeat: Infinity } as const;
+  return (
+    <motion.g
+      initial={{ x: start.x, y: start.y }}
+      animate={{ x: path.map((p) => p.x), y: path.map((p) => p.y) }}
+      transition={{ x: { ...linear, times }, y: { ...linear, times } }}
+    >
+      <motion.g
+        style={{ originX: 0, originY: 0 }}
+        initial={{ rotate: 0 }}
+        animate={{ rotate: [0, 0, turn, turn, turn * 2, turn * 2, turn * 3, turn * 3, turn * 4, turn * 4] }}
+        transition={{ ...linear, times: [0, 0.11, 0.14, 0.36, 0.39, 0.61, 0.64, 0.86, 0.89, 1] }}
+      >
+        <Arrowhead dx={dx} dy={dy} />
+      </motion.g>
+    </motion.g>
+  );
+}
+
+/* Corners in travel order: the left diamond circles counter-clockwise, the right one clockwise. */
+const LEFT_DIAMOND: [Pt, Pt, Pt, Pt] = [
+  { x: 498, y: 250 },
+  { x: 250, y: 10 },
+  { x: 2, y: 250 },
+  { x: 250, y: 490 },
+];
+const RIGHT_DIAMOND: [Pt, Pt, Pt, Pt] = [
+  { x: 502, y: 250 },
+  { x: 750, y: 10 },
+  { x: 998, y: 250 },
+  { x: 750, y: 490 },
+];
+
+/* Colours taken from the hero animation so the diagram and the animation read as one set. */
+const phases = [
+  { name: "Discover", color: "#C9D7E8" },
+  { name: "Define", color: "#EAD9B8" },
+  { name: "Develop", color: "#C8DCC8" },
+  { name: "Deliver", color: "#E9CDC9" },
+];
 
 /* Double diamond: static drawing of the discover, define, develop, deliver process. */
 function DoubleDiamond() {
@@ -234,18 +344,26 @@ function DoubleDiamond() {
           strokeLinejoin="miter"
           vectorEffect="non-scaling-stroke"
         />
+        <FlowArrow vertices={LEFT_DIAMOND} startEdge={0} turn={-90} />
+        <FlowArrow vertices={LEFT_DIAMOND} startEdge={2} turn={-90} />
+        <FlowArrow vertices={RIGHT_DIAMOND} startEdge={0} turn={90} />
+        <FlowArrow vertices={RIGHT_DIAMOND} startEdge={2} turn={90} />
       </svg>
-      <span className="absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg px-2 text-xl font-medium tracking-tighter md:text-5xl">
+      <span className="absolute left-1/4 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg px-2 font-serif text-[18px] font-normal md:text-[54px]">
         Problem
       </span>
-      <span className="absolute left-3/4 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg px-2 text-xl font-medium tracking-tighter md:text-5xl">
+      <span className="absolute left-3/4 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-bg px-2 font-serif text-[18px] font-normal md:text-[54px]">
         Solution
       </span>
       </div>
       <div className="relative mt-6 md:mt-10">
         <ul className="grid grid-cols-4 text-center text-xs font-medium tracking-tight md:text-xl">
           {phases.map((ph) => (
-            <li key={ph}>{ph}</li>
+            <li key={ph.name}>
+              <span className="inline-block rounded-lg px-2 py-1 md:px-3" style={{ backgroundColor: ph.color, color: "#121212" }}>
+                {ph.name}
+              </span>
+            </li>
           ))}
         </ul>
         {["left-1/4", "left-1/2", "left-3/4"].map((pos) => (
@@ -265,7 +383,10 @@ function Approach() {
   return (
     <section id="ethos" className="mx-auto max-w-7xl scroll-mt-16 px-4 py-24 md:px-8 md:py-40">
       <Reveal>
-        <h2 className="text-3xl font-medium tracking-tighter md:text-5xl">Ethos</h2>
+        <h2 className="text-3xl font-medium tracking-tighter md:text-5xl">Design Ethos</h2>
+        <p className="mt-4 max-w-[65ch] text-base text-muted md:text-lg">
+          My approach revolves around the double diamond methodology
+        </p>
       </Reveal>
       <div className="mt-16 md:mt-24">
         <DoubleDiamond />
@@ -285,19 +406,36 @@ function Approach() {
 
 function About() {
   return (
-    <section id="about" className="mx-auto max-w-7xl scroll-mt-16 px-4 py-24 md:px-8 md:py-40">
-      <Reveal>
-        <h2 className="text-3xl font-medium tracking-tighter md:text-5xl">About</h2>
-      </Reveal>
-      <Reveal delay={0.1} className="mt-8 md:mt-16">
-        <p className="max-w-[56ch] text-base leading-relaxed text-muted md:text-lg">
-          A Malta-based designer with 20 years of experience designing iGaming brands, products, and
-          digital experiences. My work spans the full spectrum of the industry, from creating brands from
-          the ground up to designing large-scale sportsbook and casino platforms across web and native.
-          I’ve led design teams, established design systems, and conceptualised new products for multiple
-          markets, working with some of the brightest minds in the business, I combine strategic
-          thinking with hands-on design through early discovery on through full product execution.
-        </p>
+    <section
+      id="about"
+      className="mx-auto grid max-w-7xl scroll-mt-16 grid-cols-1 items-start gap-10 px-4 py-24 md:grid-cols-12 md:gap-8 md:px-8 md:py-40"
+    >
+      <div className="md:col-span-7">
+        <Reveal>
+          <h2 className="text-3xl font-medium tracking-tighter md:text-5xl">About</h2>
+        </Reveal>
+        <Reveal delay={0.1} className="mt-8 md:mt-16">
+          <p className="max-w-[56ch] text-base leading-relaxed text-muted md:text-lg">
+            A Malta-based designer with 20 years of experience designing iGaming brands, products, and
+            digital experiences. My work spans the full spectrum of the industry, from creating brands from
+            the ground up to designing large-scale sportsbook and casino platforms across web and native.
+          </p>
+          <p className="mt-4 max-w-[56ch] text-base leading-relaxed text-muted md:text-lg">
+            I’ve led design teams, established design systems, and conceptualised new products for multiple
+            markets, working with some of the brightest minds in the business, I combine strategic
+            thinking with hands-on design through early discovery on through full product execution.
+          </p>
+        </Reveal>
+      </div>
+      <Reveal delay={0.2} className="md:col-span-4 md:col-start-9">
+        <img
+          src="/mario-borg.jpg"
+          alt="Portrait of Mario Borg"
+          width={800}
+          height={800}
+          loading="lazy"
+          className="aspect-square w-[192px] rounded-full object-cover md:ml-auto md:w-[346px]"
+        />
       </Reveal>
     </section>
   );
@@ -305,14 +443,26 @@ function About() {
 
 function Experience() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-24 md:px-8 md:py-40">
+    <section id="experience" className="mx-auto max-w-7xl scroll-mt-16 px-4 py-24 md:px-8 md:py-40">
       <Reveal>
         <h2 className="text-3xl font-medium tracking-tighter md:text-5xl">Experience</h2>
+        <p className="mt-4 max-w-[65ch] text-base text-muted md:text-lg">
+          Please{" "}
+          <a
+            href="mailto:marioborg@gmail.com"
+            className="text-fg underline decoration-line decoration-2 underline-offset-4"
+          >
+            get in touch
+          </a>{" "}
+          for a full CV
+        </p>
       </Reveal>
       <dl className="mt-12 grid grid-cols-1 gap-y-6 md:mt-20 md:ml-[33%] md:gap-y-8">
-        {roles.map(([role, years], i) => (
-          <Reveal key={role} delay={i * 0.05} className="flex items-baseline justify-between gap-6">
-            <dt className="text-base tracking-tight md:text-xl">{role}</dt>
+        {roles.map(([title, company, years], i) => (
+          <Reveal key={`${title}-${company}`} delay={i * 0.05} className="flex items-baseline justify-between gap-6">
+            <dt className="text-base tracking-tight md:text-xl">
+              {title}, <span className="font-bold">{company}</span>
+            </dt>
             <dd className="shrink-0 font-mono text-xs text-muted">{years}</dd>
           </Reveal>
         ))}
@@ -328,7 +478,7 @@ function Footer() {
         <p className="text-base text-muted md:text-lg">Get in touch</p>
         <a
           href="mailto:marioborg@gmail.com"
-          className="mt-4 inline-block break-all text-3xl font-medium tracking-tighter underline decoration-line decoration-2 underline-offset-8 transition-colors hover:decoration-accent md:text-6xl"
+          className="mt-4 inline-block break-all text-3xl font-medium tracking-tighter underline decoration-line decoration-2 underline-offset-8 md:text-6xl"
         >
           marioborg@gmail.com
         </a>
@@ -336,7 +486,7 @@ function Footer() {
       <div className="mt-24 flex flex-wrap items-center justify-between gap-4 text-sm text-muted md:mt-40">
         <p>2026 Mario Borg</p>
         <ul className="flex gap-6">
-          <li><a className="transition-colors hover:text-fg" href="https://www.linkedin.com/in/marioborg" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          <li><a href="https://www.linkedin.com/in/marioborg" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
         </ul>
       </div>
     </footer>
