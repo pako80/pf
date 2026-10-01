@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import lottie from "lottie-web";
-import { motion, useReducedMotion } from "motion/react";
+import { animate, motion, useReducedMotion } from "motion/react";
 import { ArrowDown, ArrowRight } from "@phosphor-icons/react";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -22,22 +22,28 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
 }
 
 const logos: { name: string; file: string; ext?: string; size?: string }[] = [
-  { name: "KTO", file: "kto", size: "w-full h-[28.8px] md:h-9" },
-  { name: "Betsson", file: "betsson", size: "w-[90%] h-[28.8px] md:h-9" },
-  { name: "NetRefer", file: "netrefer", size: "w-full h-[33.6px] md:h-[42px]" },
-  { name: "Authentic Gaming", file: "authentic-gaming", ext: "png", size: "w-full h-16 md:h-20" },
+  { name: "KTO", file: "kto", size: "w-[62%] h-[28.8px] md:h-9" },
+  { name: "Betsson", file: "betsson", size: "w-[56%] h-[28.8px] md:h-9" },
+  { name: "NetRefer", file: "netrefer", size: "w-[68%] h-[37px] md:h-[46.2px]" },
+  { name: "Authentic Gaming", file: "authentic-gaming", ext: "png", size: "w-[62%] h-16 md:h-20" },
 ];
 
-const principles: [string, ReactNode][] = [
+const principles: [string, ReactNode, { file: string; ratio: string }?][] = [
   [
     "Stakeholder Alignment.",
-    <>
-      Every successful project is the result of continuous stakeholder alignment, what, why and who{" "}
-      <ArrowRight aria-label="leads to" weight="regular" className="inline size-[0.7em] align-baseline" /> discover
-    </>,
+    "Every successful project is the result of continuous stakeholder alignment.",
+    { file: "alignment", ratio: "80 / 107" },
   ],
-  ["Prototype smarter.", "I use AI to rapidly explore ideas, flows, motion, validate assumptions and cross test with real users or data. Iterate into a polished UI."],
-  ["Ship pragmatically.", "I understand the codebase, constraints, and possibilities, turning design intent into what actually ships."],
+  [
+    "Prototype smarter.",
+    "I use AI to rapidly explore ideas, flows, motion, validate assumptions and cross test with real users or data. Iterate into a polished UI.",
+    { file: "proto", ratio: "69 / 106" },
+  ],
+  [
+    "Ship pragmatically.",
+    "I understand the codebase, constraints, and possibilities, turning design intent into what actually ships.",
+    { file: "ship", ratio: "85 / 108" },
+  ],
 ];
 
 const roles = [
@@ -174,10 +180,10 @@ function Hero() {
         <motion.div {...enter(0.24)} className="mt-10">
           <a
             href="#contact"
-            className="group inline-flex items-center gap-2 bg-fg px-6 py-3.5 text-sm font-medium text-on-fg transition-transform active:scale-[0.98]"
+            className="group inline-flex items-center gap-2 rounded-[6px] bg-fg px-6 py-3.5 text-sm font-medium text-on-fg transition-transform active:scale-[0.98]"
           >
             Get in touch
-            <ArrowDown size={16} weight="regular" />
+            <ArrowDown size={16} weight="regular" className="group-hover:animate-[arrow-bounce_0.8s_ease-in-out_infinite] motion-reduce:group-hover:animate-none" />
           </a>
         </motion.div>
       </div>
@@ -191,25 +197,27 @@ function Hero() {
 function Work() {
   return (
     <section id="work" className="mx-auto max-w-7xl scroll-mt-16 px-4 py-24 md:px-8 md:py-40">
-      <ul aria-label="Brands I have worked with" className="grid grid-cols-2 items-center gap-x-8 gap-y-14 md:grid-cols-4 md:gap-x-16">
+      <ul aria-label="Brands I have worked with" className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
         {logos.map((l, i) => (
           <li key={l.file}>
             <Reveal delay={i * 0.06}>
-              <span
-                role="img"
-                aria-label={`${l.name} logo`}
-                className={`block bg-fg ${l.size ?? "w-full h-8 md:h-10"}`}
-                style={{
-                  maskImage: `url(/logos/${l.file}.${l.ext ?? "svg"})`,
-                  WebkitMaskImage: `url(/logos/${l.file}.${l.ext ?? "svg"})`,
-                  maskRepeat: "no-repeat",
-                  WebkitMaskRepeat: "no-repeat",
-                  maskPosition: "left center",
-                  WebkitMaskPosition: "left center",
-                  maskSize: "contain",
-                  WebkitMaskSize: "contain",
-                }}
-              />
+              <div className="grid aspect-[3/2] place-items-center rounded-[12px] bg-card md:aspect-[2/1]">
+                <span
+                  role="img"
+                  aria-label={`${l.name} logo`}
+                  className={`block bg-fg ${l.size ?? "w-[62%] h-8 md:h-10"}`}
+                  style={{
+                    maskImage: `url(/logos/${l.file}.${l.ext ?? "svg"})`,
+                    WebkitMaskImage: `url(/logos/${l.file}.${l.ext ?? "svg"})`,
+                    maskRepeat: "no-repeat",
+                    WebkitMaskRepeat: "no-repeat",
+                    maskPosition: "center",
+                    WebkitMaskPosition: "center",
+                    maskSize: "contain",
+                    WebkitMaskSize: "contain",
+                  }}
+                />
+              </div>
             </Reveal>
           </li>
         ))}
@@ -247,44 +255,58 @@ type Pt = { x: number; y: number };
 const LOOP_SECONDS = 32;
 const mid = (a: Pt, b: Pt): Pt => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
 
+/* Piecewise-linear lookup: value at time t for matching `times` and `values` arrays. */
+function sample(times: number[], values: number[], t: number) {
+  for (let i = 1; i < times.length; i++) {
+    if (t <= times[i]) {
+      const span = times[i] - times[i - 1];
+      const k = span === 0 ? 1 : (t - times[i - 1]) / span;
+      return values[i - 1] + (values[i] - values[i - 1]) * k;
+    }
+  }
+  return values[values.length - 1];
+}
+
 /*
- * An arrowhead that circles a diamond: it follows each edge, turns 90 degrees at every corner and keeps going
+ * An arrowhead that circles a diamond: it follows each edge, pauses at every corner to turn 90 degrees and keeps going
  * until it is back where it started. `vertices` are listed in travel order, `startEdge` picks where the loop begins,
  * and `turn` is -90 for counter-clockwise or 90 for clockwise. Static on its edge under reduced motion.
+ * The position is written as an SVG transform attribute so the arrowhead tip is always the pivot and stays on the line.
  */
 function FlowArrow({ vertices, startEdge, turn }: { vertices: [Pt, Pt, Pt, Pt]; startEdge: number; turn: -90 | 90 }) {
   const reduce = useReducedMotion();
+  const ref = useRef<SVGGElement>(null);
   const v = (i: number) => vertices[(startEdge + i) % 4];
   const start = mid(v(0), v(1));
   const dx = v(1).x - v(0).x;
   const dy = v(1).y - v(0).y;
 
-  if (reduce) {
-    return (
-      <g transform={`translate(${start.x} ${start.y})`}>
-        <Arrowhead dx={dx} dy={dy} />
-      </g>
-    );
-  }
+  useEffect(() => {
+    if (reduce || !ref.current) return;
+    const node = ref.current;
+    const stops = [start, v(1), v(1), v(2), v(2), v(3), v(3), v(4), v(4), start];
+    const times = [0, 0.11, 0.14, 0.36, 0.39, 0.61, 0.64, 0.86, 0.89, 1];
+    const xs = stops.map((p) => p.x);
+    const ys = stops.map((p) => p.y);
+    const angles = [0, 0, 1, 1, 2, 2, 3, 3, 4, 4].map((n) => n * turn);
+    const controls = animate(0, 1, {
+      duration: LOOP_SECONDS,
+      ease: "linear",
+      repeat: Infinity,
+      onUpdate: (t) =>
+        node.setAttribute(
+          "transform",
+          `translate(${sample(times, xs, t)} ${sample(times, ys, t)}) rotate(${sample(times, angles, t)})`,
+        ),
+    });
+    return () => controls.stop();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reduce, startEdge, turn]);
 
-  const path = [start, v(1), v(2), v(3), v(4), start];
-  const times = [0, 0.125, 0.375, 0.625, 0.875, 1];
-  const linear = { duration: LOOP_SECONDS, ease: "linear", repeat: Infinity } as const;
   return (
-    <motion.g
-      initial={{ x: start.x, y: start.y }}
-      animate={{ x: path.map((p) => p.x), y: path.map((p) => p.y) }}
-      transition={{ x: { ...linear, times }, y: { ...linear, times } }}
-    >
-      <motion.g
-        style={{ originX: 0, originY: 0 }}
-        initial={{ rotate: 0 }}
-        animate={{ rotate: [0, 0, turn, turn, turn * 2, turn * 2, turn * 3, turn * 3, turn * 4, turn * 4] }}
-        transition={{ ...linear, times: [0, 0.11, 0.14, 0.36, 0.39, 0.61, 0.64, 0.86, 0.89, 1] }}
-      >
-        <Arrowhead dx={dx} dy={dy} />
-      </motion.g>
-    </motion.g>
+    <g ref={ref} transform={`translate(${start.x} ${start.y})`}>
+      <Arrowhead dx={dx} dy={dy} />
+    </g>
   );
 }
 
@@ -392,8 +414,25 @@ function Approach() {
         <DoubleDiamond />
       </div>
       <div className="mt-24 flex flex-col gap-14 md:ml-[33%] md:mt-40 md:gap-20">
-        {principles.map(([lead, body], i) => (
-          <Reveal key={lead} delay={i * 0.06}>
+        {principles.map(([lead, body, icon], i) => (
+          <Reveal key={lead} delay={i * 0.06} className="relative">
+            {icon && (
+              <span
+                aria-hidden="true"
+                className="mb-5 block h-14 bg-fg md:absolute md:right-full md:top-1 md:mb-0 md:mr-16 md:h-[72px]"
+                style={{
+                  aspectRatio: icon.ratio,
+                  maskImage: `url(/icons/${icon.file}.svg)`,
+                  WebkitMaskImage: `url(/icons/${icon.file}.svg)`,
+                  maskRepeat: "no-repeat",
+                  WebkitMaskRepeat: "no-repeat",
+                  maskPosition: "right top",
+                  WebkitMaskPosition: "right top",
+                  maskSize: "contain",
+                  WebkitMaskSize: "contain",
+                }}
+              />
+            )}
             <p className="max-w-[36ch] text-2xl font-medium leading-snug tracking-tight md:text-4xl">
               {lead} <span className="font-normal text-soft">{body}</span>
             </p>
