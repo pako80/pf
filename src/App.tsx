@@ -22,7 +22,7 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
 }
 
 const logos: { name: string; file: string; ext?: string; size?: string }[] = [
-  { name: "KTO", file: "kto", size: "w-[62%] h-[28.8px] md:h-9" },
+  { name: "KTO", file: "kto", size: "w-[58.9%] h-[27.4px] md:h-[34.2px]" },
   { name: "Kambi", file: "kambi" },
   { name: "Betsson", file: "betsson", size: "w-[56%] h-[28.8px] md:h-9" },
   { name: "Altenar", file: "altenar" },
@@ -33,27 +33,29 @@ const logos: { name: string; file: string; ext?: string; size?: string }[] = [
 const principles: [string, ReactNode, { file: string; ratio: string }?][] = [
   [
     "Stakeholder Alignment.",
-    "Every successful project is the result of continuous stakeholder alignment.",
+    "I believe successful projects are built through continuous alignment. I connect business needs, user needs, and brand vision to shape a design direction that delivers against the bigger goal.",
     { file: "alignment", ratio: "80 / 107" },
   ],
   [
-    "Prototype smarter.",
-    "I use AI to rapidly explore ideas, flows, motion, validate assumptions and cross test with real users or data. Iterate into a polished UI.",
+    "Prototype Smarter.",
+    "I use AI to explore, test, and iterate at speed, rapidly prototyping ideas, flows, and motion, validating assumptions with users and data, then refining what works into polished UI.",
     { file: "proto", ratio: "69 / 106" },
   ],
   [
-    "Ship pragmatically.",
-    "I understand the codebase, constraints, and possibilities, turning design intent into what actually ships.",
+    "Ship Pragmatically.",
+    "I understand the codebase, constraints, and possibilities. I work in close partnership with product and engineering to turn design intent into practical, production-ready experiences.",
     { file: "ship", ratio: "85 / 108" },
   ],
 ];
 
+
+
 const roles = [
   ["Head of Design", "KTO Group", "2017-2026"],
-  ["Lead Design for Products", "Betsson", "2015-2017"],
-  ["Lead Design for Native", "Betsson", "2013-2015"],
+  ["Lead Design Products", "Betsson", "2015-2017"],
+  ["Lead Design Native", "Betsson", "2013-2015"],
   ["Lead Design", "Betsson Labs", "2012-2013"],
-  ["Lead Design Sportsbook Product", "IBA Entertainment", "2011-2012"],
+  ["Lead Design Sportsbook", "IBA Entertainment", "2011-2012"],
   ["Creative Director", "NetRefer", "2006-2010"],
 ];
 
@@ -93,21 +95,29 @@ function Nav() {
   return (
     <header className="sticky top-0 z-40 bg-bg/85 backdrop-blur">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 md:px-8">
-        <a href="#top" aria-label="Mario Borg, back to top" className="block">
+        <div className="group relative">
+          <a href="#top" aria-label="Mario Borg, back to top" className="block">
+            <span
+              className="block aspect-[102.6/114.5] h-[46px] bg-fg"
+              style={{
+                maskImage: "url(/logos/monogram.svg)",
+                WebkitMaskImage: "url(/logos/monogram.svg)",
+                maskRepeat: "no-repeat",
+                WebkitMaskRepeat: "no-repeat",
+                maskPosition: "left center",
+                WebkitMaskPosition: "left center",
+                maskSize: "contain",
+                WebkitMaskSize: "contain",
+              }}
+            />
+          </a>
           <span
-            className="block aspect-[102.6/114.5] h-[46px] bg-fg"
-            style={{
-              maskImage: "url(/logos/monogram.svg)",
-              WebkitMaskImage: "url(/logos/monogram.svg)",
-              maskRepeat: "no-repeat",
-              WebkitMaskRepeat: "no-repeat",
-              maskPosition: "left center",
-              WebkitMaskPosition: "left center",
-              maskSize: "contain",
-              WebkitMaskSize: "contain",
-            }}
-          />
-        </a>
+            aria-hidden="true"
+            className="pointer-events-none absolute left-full top-1/2 ml-4 hidden -translate-x-1 -translate-y-1/2 whitespace-nowrap text-base text-muted opacity-0 transition-all duration-300 ease-out group-hover:translate-x-0 group-hover:opacity-100 motion-reduce:transition-none md:block"
+          >
+            Mario Borg
+          </span>
+        </div>
         <ul className="flex items-center gap-6 text-base text-muted md:gap-10">
           {NAV_LINKS.map((l) => {
             const on = active === l.id;
