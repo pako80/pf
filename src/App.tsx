@@ -23,7 +23,9 @@ function Reveal({ children, delay = 0, className = "" }: { children: ReactNode; 
 
 const logos: { name: string; file: string; ext?: string; size?: string }[] = [
   { name: "KTO", file: "kto", size: "w-[62%] h-[28.8px] md:h-9" },
+  { name: "Kambi", file: "kambi" },
   { name: "Betsson", file: "betsson", size: "w-[56%] h-[28.8px] md:h-9" },
+  { name: "Altenar", file: "altenar" },
   { name: "NetRefer", file: "netrefer", size: "w-[68%] h-[37px] md:h-[46.2px]" },
   { name: "Authentic Gaming", file: "authentic-gaming", ext: "png", size: "w-[62%] h-16 md:h-20" },
 ];
@@ -51,6 +53,8 @@ const roles = [
   ["Lead Design for Products", "Betsson", "2015-2017"],
   ["Lead Design for Native", "Betsson", "2013-2015"],
   ["Lead Design", "Betsson Labs", "2012-2013"],
+  ["Lead Design Sportsbook Product", "IBA Entertainment", "2011-2012"],
+  ["Creative Director", "NetRefer", "2006-2010"],
 ];
 
 const NAV_LINKS = [
@@ -146,6 +150,7 @@ function TypingAnimation() {
       rendererSettings: { preserveAspectRatio: "xMaxYMin meet" },
     });
     if (reduce) anim.addEventListener("DOMLoaded", () => anim.goToAndStop(150, true));
+
     return () => anim.destroy();
   }, [reduce]);
   return (
@@ -196,12 +201,18 @@ function Hero() {
 
 function Work() {
   return (
-    <section id="work" className="mx-auto max-w-7xl scroll-mt-16 px-4 py-24 md:px-8 md:py-40">
-      <ul aria-label="Brands I have worked with" className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+    <section id="work" className="mx-auto max-w-7xl scroll-mt-16 px-4 pb-0 pt-24 md:px-8 md:pt-40">
+      <Reveal>
+        <h2 className="text-3xl font-medium tracking-tighter md:text-5xl">Companies</h2>
+        <p className="mt-4 max-w-[65ch] text-base text-muted md:text-lg">
+          Companies I worked for and collaborated with
+        </p>
+      </Reveal>
+      <ul className="mt-10 grid grid-cols-2 gap-4 md:mt-16 md:grid-cols-3 md:gap-6">
         {logos.map((l, i) => (
           <li key={l.file}>
             <Reveal delay={i * 0.06}>
-              <div className="grid aspect-[3/2] place-items-center rounded-[12px] bg-card md:aspect-[2/1]">
+              <div className="grid aspect-[5/4] place-items-center rounded-[12px] bg-card md:aspect-[5/2]">
                 <span
                   role="img"
                   aria-label={`${l.name} logo`}
@@ -242,7 +253,7 @@ function Arrowhead({ dx, dy }: { dx: number; dy: number }) {
     <polyline
       points={`${barb(1)} 0,0 ${barb(-1)}`}
       stroke="var(--mid)"
-      strokeWidth={1.5}
+      strokeWidth={3}
       strokeLinecap="round"
       strokeLinejoin="round"
       vectorEffect="non-scaling-stroke"
@@ -355,14 +366,14 @@ function DoubleDiamond() {
         <polygon
           points="2,250 250,10 498,250 250,490"
           stroke="var(--mid)"
-          strokeWidth={1}
+          strokeWidth={3}
           strokeLinejoin="miter"
           vectorEffect="non-scaling-stroke"
         />
         <polygon
           points="502,250 750,10 998,250 750,490"
           stroke="var(--mid)"
-          strokeWidth={1}
+          strokeWidth={3}
           strokeLinejoin="miter"
           vectorEffect="non-scaling-stroke"
         />
@@ -403,7 +414,7 @@ function DoubleDiamond() {
 
 function Approach() {
   return (
-    <section id="ethos" className="mx-auto max-w-7xl scroll-mt-16 px-4 py-24 md:px-8 md:py-40">
+    <section id="ethos" className="mx-auto max-w-7xl scroll-mt-16 px-4 pb-0 pt-24 md:px-8 md:pt-40">
       <Reveal>
         <h2 className="text-3xl font-medium tracking-tighter md:text-5xl">Design Ethos</h2>
         <p className="mt-4 max-w-[65ch] text-base text-muted md:text-lg">
@@ -473,7 +484,7 @@ function About() {
           width={800}
           height={800}
           loading="lazy"
-          className="aspect-square w-[192px] rounded-full object-cover md:ml-auto md:w-[346px]"
+          className="mx-auto aspect-square w-[250px] max-w-full rounded-full object-cover md:ml-auto md:mr-0 md:w-[346px]"
         />
       </Reveal>
     </section>
