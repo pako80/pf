@@ -54,7 +54,7 @@ const roles = [
   ["Head of Design", "KTO Group", "2017-2026"],
   ["Lead Design Products", "Betsson", "2015-2017"],
   ["Lead Design Native", "Betsson", "2013-2015"],
-  ["Lead Design", "Betsson Labs", "2012-2013"],
+  ["Business Strategy Designer", "Betsson", "2012-2013"],
   ["Lead Design Sportsbook", "IBA Entertainment", "2011-2012"],
   ["Creative Director", "NetRefer", "2006-2010"],
 ];
@@ -547,6 +547,7 @@ function Footer() {
         <p>2026 Mario Borg</p>
         <ul className="flex gap-6">
           <li><a href="https://www.linkedin.com/in/marioborg" target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          <li><a href="https://www.instagram.com/marioborg/" target="_blank" rel="noopener noreferrer">Instagram</a></li>
         </ul>
       </div>
     </footer>
